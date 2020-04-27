@@ -8,6 +8,9 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -15,6 +18,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Component
 public class AccessLimitInterceptor implements HandlerInterceptor {
+
+    @Autowired
+    private RedisTemplate<String, Integer> redisTemplate;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -30,7 +36,7 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
             }
             int limit = accessLimit.limit();
             int sec = accessLimit.sec();
-            String key = IPUtil.getIpAddr(request) + request.getRequestURI();
+            String key = request.getRemoteAddr() + request.getRequestURI();
             Integer maxLimit = redisTemplate.opsForValue().get(key);
             if (maxLimit == null) {
                 redisTemplate.opsForValue().set(key, 1, sec, TimeUnit.SECONDS);  //set时一定要加过期时间
