@@ -13,8 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AccessLimit {
 
-    int limit() default 5;
-
-    int sec() default 5;
+    double queryPerSecond() default 1.0;
 
 }
